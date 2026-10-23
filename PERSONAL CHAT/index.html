@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+<title>Nishant Awasthi: resume chat</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #fafafb;
+    --fg: #17181c;
+    --muted: #6b6f7a;
+    --line: #e2e3e8;
+    --soft: #f0f1f4;
+    --accent: #3b5bdb;
+    --accent-fg: #ffffff;
+    --user-bg: #17181c;
+    --user-fg: #ffffff;
+    --err: #c2342b;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #121316;
+      --fg: #ececf0;
+      --muted: #8d92a0;
+      --line: #2a2c33;
+      --soft: #1b1d22;
+      --accent: #8aa4ff;
+      --accent-fg: #0e1020;
+      --user-bg: #ececf0;
+      --user-fg: #121316;
+      --err: #ff8a80;
+    }
+  }
+
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    overflow: hidden;              /* the page never scrolls; only #messages does */
+    background: var(--bg);
+    color: var(--fg);
+    font: 16px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .app {
+    height: 100%;
+    height: 100dvh;
+    max-width: 720px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+  }
+
+  header {
+    flex: none;
+    padding: 14px 20px;
+    padding-top: calc(14px + env(safe-area-inset-top, 0px));
+    border-bottom: 1px solid var(--line);
+  }
+  header h1 { margin: 0; font-size: 16px; font-weight: 650; letter-spacing: -0.01em; }
+  header p { margin: 2px 0 0; font-size: 13px; color: var(--muted); }
+  header a { color: var(--accent); text-underline-offset: 2px; }
+
+  #messages {
+    flex: 1;
+    min-height: 0;                 /* lets the flex child shrink so it can scroll */
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .empty {
+    margin: auto;                  /* centers vertically inside the scroll area */
+    text-align: center;
+    max-width: 520px;
+  }
+  .empty[hidden] { display: none; }
+  .empty h2 { margin: 0 0 6px; font-size: 22px; font-weight: 650; letter-spacing: -0.015em; }
+  .empty p { margin: 0 0 20px; color: var(--muted); }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+  .chip {
+    font: inherit;
+    font-size: 14px;
+    color: var(--fg);
+    background: transparent;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 8px 12px;
+    cursor: pointer;
+  }
+  .chip:hover { background: var(--soft); }
+
+  .msg { flex: none; margin: 0 0 18px; overflow-wrap: anywhere; }
+  .msg.user {
+    align-self: flex-end;
+    max-width: 85%;
+    background: var(--user-bg);
+    color: var(--user-fg);
+    padding: 8px 14px;
+    border-radius: 16px 16px 4px 16px;
+    white-space: pre-wrap;
+  }
+  .msg.bot p { margin: 0 0 8px; }
+  .msg.bot p:last-child { margin-bottom: 0; }
+  .msg.bot ul { margin: 0 0 8px; padding-left: 20px; }
+  .msg.bot code { font-size: 0.9em; background: var(--soft); padding: 1px 5px; border-radius: 4px; }
+  .msg .err { color: var(--err); }
+
+  .dot {
+    display: inline-block;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--muted);
+    animation: pulse 1s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%, 100% { opacity: 0.25; } 50% { opacity: 1; } }
+
+  form {
+    flex: none;
+    padding: 10px 16px;
+    padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  }
+  .box {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    background: var(--soft);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 6px 6px 6px 14px;
+  }
+  .box:focus-within { border-color: var(--accent); }
+  textarea {
+    flex: 1;
+    min-width: 0;
+    resize: none;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;                 /* 16px keeps iOS from zooming on focus */
+    line-height: 1.45;
+    padding: 6px 0;
+    max-height: 140px;
+  }
+  textarea::placeholder { color: var(--muted); }
+  #send {
+    flex: none;
+    width: 36px; height: 36px;
+    border: 0;
+    border-radius: 10px;
+    background: var(--accent);
+    color: var(--accent-fg);
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+  }
+  #send:disabled { opacity: 0.35; cursor: default; }
+  #send svg { width: 18px; height: 18px; }
+
+  button:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .dot { animation: none; opacity: 0.6; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <h1>Nishant Awasthi</h1>
+    <p>AI version that answers only from my resume. <a href="/resume" download="Nishant_Awasthi_Resume.pdf">Click to download my resume</a></p>
+  </header>
+
+  <main id="messages" aria-live="polite">
+    <section class="empty" id="empty">
+      <h2>What would you like to know?</h2>
+      <p>Pick a question or type your own.</p>
+      <div class="chips" id="chips"></div>
+    </section>
+  </main>
+
+  <form id="form" autocomplete="off">
+    <div class="box">
+      <textarea id="input" rows="1" placeholder="Ask about my experience, projects or skills" aria-label="Your question"></textarea>
+      <button id="send" type="submit" aria-label="Send" disabled>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+      </button>
+    </div>
+  </form>
+</div>
+
+<script>
+  const SUGGESTIONS = [
+    "Walk me through your projects",
+    "What are your strongest technical skills?",
+    "Tell me about your education",
+    "Do you have internship or work experience?",
+    "What certifications do you have?"
+  ];
+
+  const messages = document.getElementById("messages");
+  const empty = document.getElementById("empty");
+  const chips = document.getElementById("chips");
+  const form = document.getElementById("form");
+  const input = document.getElementById("input");
+  const send = document.getElementById("send");
+  let busy = false;
+
+  // minimal markdown: **bold**, `code`, "- " bullets, "#" headings
+  const esc = s => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const inline = t => esc(t)
+    .replace(/`([^`]+)`/g, "<code>$1</code>")
+    .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+
+  function md(src) {
+    let out = "", list = false;
+    for (const line of src.split("\n")) {
+      const li = line.match(/^\s*[-*•]\s+(.*)/);
+      const h = line.match(/^#{1,6}\s+(.*)/);
+      if (li) {
+        if (!list) { out += "<ul>"; list = true; }
+        out += "<li>" + inline(li[1]) + "</li>";
+        continue;
+      }
+      if (list) { out += "</ul>"; list = false; }
+      if (h) out += "<p><strong>" + inline(h[1]) + "</strong></p>";
+      else if (line.trim()) out += "<p>" + inline(line) + "</p>";
+    }
+    return list ? out + "</ul>" : out;
+  }
+
+  const nearBottom = () => messages.scrollHeight - messages.scrollTop - messages.clientHeight < 80;
+  const toBottom = () => { messages.scrollTop = messages.scrollHeight; };
+
+  function addMsg(role, text) {
+    const el = document.createElement("div");
+    el.className = "msg " + role;
+    if (text) el.textContent = text;
+    messages.appendChild(el);
+    return el;
+  }
+
+  function resize() {
+    input.style.height = "auto";
+    input.style.height = Math.min(input.scrollHeight, 140) + "px";
+  }
+
+  async function ask(question) {
+    question = question.trim();
+    if (!question || busy) return;
+    busy = true;
+    send.disabled = true;
+    empty.hidden = true;
+
+    addMsg("user", question);
+    input.value = "";
+    resize();
+
+    const bot = addMsg("bot");
+    bot.innerHTML = '<span class="dot"></span>';
+    toBottom();
+
+    let text = "";
+    try {
+      const res = await fetch("/chat/stream", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question })
+      });
+      if (!res.ok) throw new Error("Server returned " + res.status);
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        text += decoder.decode(value, { stream: true });
+        const stick = nearBottom();          // measure before the DOM grows
+        bot.innerHTML = md(text);
+        if (stick) toBottom();
+      }
+      if (!text.trim()) bot.innerHTML = '<p class="err">No answer came back. Ask again.</p>';
+    } catch (e) {
+      bot.innerHTML = md(text) + '<p class="err">Could not get an answer. Check that the server is running, then ask again.</p>';
+    } finally {
+      busy = false;
+      send.disabled = !input.value.trim();
+      input.focus();
+    }
+  }
+
+  SUGGESTIONS.forEach(q => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "chip";
+    b.textContent = q;
+    b.addEventListener("click", () => ask(q));
+    chips.appendChild(b);
+  });
+
+  form.addEventListener("submit", e => { e.preventDefault(); ask(input.value); });
+  input.addEventListener("input", () => { resize(); send.disabled = busy || !input.value.trim(); });
+  input.addEventListener("keydown", e => {
+    if (e.key === "Enter" && !e.shiftKey && !e.isComposing) {
+      e.preventDefault();
+      ask(input.value);
+    }
+  });
+  input.focus();
+</script>
+</body>
+</html>

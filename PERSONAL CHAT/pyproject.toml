@@ -1,0 +1,24 @@
+[project]
+name = "personal-chat"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Nishant Awasthi", email = "nishant.officialpost@gmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.159.1",
+    "groq>=1.7.0",
+    "pydantic>=2.14.1",
+    "pypdf>=6.21.2",
+    "python-dotenv>=1.2.4",
+    "uvicorn>=0.54.0",
+]
+
+[project.scripts]
+personal-chat = "personal_chat:main"
+
+[build-system]
+requires = ["uv_build>=0.13.4,<0.14.0"]
+build-backend = "uv_build"
