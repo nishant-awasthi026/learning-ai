@@ -7,18 +7,19 @@ A collection of AI and LLM experiments, implementations, and mini-projects explo
 1. **LLM API CALL**
    - Basics of calling and interfacing with LLM APIs (e.g. Groq).
 
-2. **PERSONAL CHAT**
+2. **PYDANTIC_JSON**
+   - Structured JSON output parsing and validation using Pydantic schemas with LLMs.
+
+3. **ReAct Chaining**
+   - Implementation of Reasoning and Acting (ReAct) agent workflow patterns.
+
+4. **STREAM LLM API**
+   - Real-time token streaming with LLM APIs for interactive chat and CLI streaming.
+
+5. **PERSONAL CHAT**
    - Interactive resume AI chatbot built with FastAPI and Groq API.
    - Includes custom web frontend (`index.html`), API endpoints, and resume parsing.
 
-3. **PYDANTIC_JSON**
-   - Structured JSON output parsing and validation using Pydantic schemas with LLMs.
-
-4. **ReAct Chaining**
-   - Implementation of Reasoning and Acting (ReAct) agent workflow patterns.
-
-5. **STREAM LLM API**
-   - Real-time token streaming with LLM APIs for interactive chat and CLI streaming.
 
 ## Getting Started
 
